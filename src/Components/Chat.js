@@ -19,12 +19,25 @@ const Chat = ({
       className="justify-between items-center border-b-2 border-[#f6f6f6] flex-row"
       onPress={() => onclick({ name, dp, number })}
     >
+    {
+      dp ?
       <Image
         width={75}
         height={75}
+        style={{resizeMode:"center", objectFit:"cover"}}
         className="rounded-full m-3"
         source={{ uri: dp }}
       />
+      :
+      <Image
+        width={75}
+        height={75}
+        style={{resizeMode:"center", width:75,height:75}}
+        className="rounded-full m-3"
+        source={require('../../assets/dp-default.jpg')}
+      />
+    }
+      
       <View className="flex-1 flex-col pr-2">
         <View className="flex-row m-1.5 justify-between">
           <Text className="font-bold text-lg">{name}</Text>

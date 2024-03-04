@@ -1,47 +1,41 @@
-import axios from "axios";
 import { useState } from "react";
 import {
   View,
   Text,
   Pressable,
   TextInput,
-  ActivityIndicator,
-  Keyboard,
   ToastAndroid,
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { API_URL } from "../../config";
-import { useMainStore } from "../stores/mainStore";
+import axios from "axios";
 
-const AuthScreen = ({ navigation }) => {
+const Signup = ({ navigation }) => {
+  const [userName, setUserName] = useState("");
   const [number, setNumber] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState(null);
   const [fetching, setFetching] = useState(false);
 
-  const signInLocal = useMainStore((state) => state.signIn);
-
-  const login = () => {
+  const signUp = async () => {
     Keyboard.dismiss();
     setFetching(true);
-    axios
-      .post(`${API_URL}/login`, { number, password })
+    axios({
+      method: "POST",
+      url: `${API_URL}/login/signup`,
+      data: { userName, number, password },
+    })
       .then((data) => {
-        setFetching(false);
+        navigation.goBack();
+        ToastAndroid.show("Registered successfully", ToastAndroid.SHORT);
         setError(null);
-        if (data) {
-          const { token, user } = data.data;
-          const { number, name, _id } = user;
-          signInLocal({ token, number, name, _id });
-        }
+        setFetching(false);
       })
       .catch((error) => {
         setFetching(false);
-        if (error.response?.status) {
-          setError(error.response.data);
-        } else {
-          ToastAndroid.show("Unable to connect to server",ToastAndroid.SHORT)
-        }
+        setError(error.response.data);
       });
   };
 
@@ -50,8 +44,14 @@ const AuthScreen = ({ navigation }) => {
       className="flex-1 justify-center items-center bg-white p-4"
       style={{ gap: 20 }}
     >
-      <Text className="text-3xl font-semibold">Login</Text>
+      <Text className="text-3xl font-semibold">Signup</Text>
       {error && <Text className="text-red-500">{error}</Text>}
+      <TextInput
+        placeholder="Username"
+        className="border-2 border-[#f0f0f0] w-full p-2 px-4 rounded-2xl"
+        value={userName}
+        onChangeText={(value) => setUserName(value)}
+      />
       <TextInput
         placeholder="Number"
         className="border-2 border-[#f0f0f0] w-full p-2 px-4 rounded-2xl"
@@ -71,9 +71,9 @@ const AuthScreen = ({ navigation }) => {
           <Pressable
             android_ripple={{ borderless: true }}
             className="bg-slate-500 p-2 w-full items-center"
-            onPress={login}
+            onPress={signUp}
           >
-            <Text className="text-white text-lg">Login</Text>
+            <Text className="text-white text-lg">Signup</Text>
           </Pressable>
         </View>
       ) : (
@@ -86,11 +86,11 @@ const AuthScreen = ({ navigation }) => {
           </Pressable>
         </View>
       )}
-      <Pressable onPress={() => navigation.navigate("Signup")}>
-        <Text className="text-lg underline text-blue-500">Go to signup</Text>
+      <Pressable onPress={() => navigation.goBack()}>
+        <Text className="text-lg underline text-blue-500">Go to login</Text>
       </Pressable>
     </View>
   );
 };
 
-export default AuthScreen;
+export default Signup;

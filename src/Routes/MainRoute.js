@@ -9,6 +9,7 @@ import { storage } from "../DL/MMKV_Storage";
 import ChatScreenHeader from "../Components/ChatScreenHeader";
 import { useMainStore } from "../stores/mainStore";
 import AuthScreen from "../Screens/AuthScreen";
+import Signup from "../Screens/Signup";
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,9 @@ const MainRoute = () => {
   const userNumber = storage.getString("user.number");
 
   useEffect(() => {
+    if(isSignedIn && !socket.connected){
+      socket.connect()
+    }
     socket.on("connect", function () {
       console.log("Connected to server");
     });
@@ -54,9 +58,21 @@ const MainRoute = () => {
         </>
       ) : (
         <>
-          <Stack.Screen options={{
-            headerShown: false
-          }} name="AuthScreen" component={AuthScreen} />
+          <Stack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="AuthScreen"
+            component={AuthScreen}
+          />
+          <Stack.Screen
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+            name="Signup"
+            component={Signup}
+          />
         </>
       )}
     </Stack.Navigator>

@@ -21,12 +21,22 @@ const ChatScreenHeader = ({ navigation }) => {
         >
           <Ionicons name="arrow-back-outline" size={26} color={"#000"} />
         </Pressable>
-        <Image
-          width={40}
-          height={40}
-          source={{ uri: imageSource }}
-          className="rounded-full"
-        />
+        {imageSource ? (
+          <Image
+            width={40}
+            height={40}
+            source={{ uri: imageSource }}
+            className="rounded-full"
+          />
+        ) : (
+          <Image
+            width={40}
+            height={40}
+            style={{width:40, height: 40, resizeMode: "center"}}
+            source={require('../../assets/dp-default.jpg')}
+            className="rounded-full"
+          />
+        )}
         <Text className="text-lg">{headerName}</Text>
       </View>
       <View>

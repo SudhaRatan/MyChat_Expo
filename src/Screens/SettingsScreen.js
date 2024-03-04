@@ -23,7 +23,6 @@ const SettingsScreen = () => {
       socket.connect();
       socket.emit("join", { number });
       storage.set("user.number", number);
-      
     }
   };
 
@@ -42,7 +41,7 @@ const SettingsScreen = () => {
           borderColor: borderColor,
         }}
       />
-      <Button title="Join room" onPress={joinRoomHandler} />
+      <Button title="Join room" />
     </View>
   );
 };

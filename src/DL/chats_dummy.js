@@ -1,7 +1,6 @@
 const chats = [
   {
     id: 1,
-    dp: "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp",
     name: "Ramesh",
     lastMessage: 'Bye👋',
     lastMessageDateTime: '16:10',
@@ -21,7 +20,6 @@ const chats = [
   },
   {
     id: 2,
-    dp: "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp",
     name: "Suresh",
     lastMessage: 'Hello!!',
     lastMessageDateTime: '10:30',

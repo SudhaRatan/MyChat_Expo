@@ -6,10 +6,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, View, TouchableOpacity, Pressable } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import GradientText from "../Components/LinearGradientText";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useMainStore } from "../stores/mainStore";
 
 const Tab = createBottomTabNavigator();
 
 const MainScreenTabs = () => {
+
+  const signout = useMainStore((state) => state.signOut)
+
   return (
     <Tab.Navigator
       initialRouteName="Chats"
@@ -85,6 +90,11 @@ const MainScreenTabs = () => {
                 <Ionicons name="settings-outline" size={24} color="#b1b1b1" />
               </View>
             ),
+          headerRight: () => (
+            <TouchableOpacity className="px-4" onPress={signout}>
+              <MaterialIcons name="logout" size={24} color={'#000000'} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Tab.Navigator>
