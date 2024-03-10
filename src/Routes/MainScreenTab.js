@@ -8,71 +8,68 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import GradientText from "../Components/LinearGradientText";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMainStore } from "../stores/mainStore";
+import ChatScreenHeaderRight from "../Components/ChatScreenHeaderRight";
+import { useChatStore } from "../stores/chatsStore";
+import { useContactStore } from "../stores/contactStore";
+import { useShallow } from "zustand/react/shallow";
+import { useColorScheme } from "nativewind";
 
 const Tab = createBottomTabNavigator();
 
 const MainScreenTabs = () => {
+  const signOut = useMainStore((state) => state.signOut);
+  const setChats = useChatStore((state) => state.setChats);
+  const { colorScheme } = useColorScheme();
+  const { setContacts, setTempContacts, setPermissionGranted } =
+    useContactStore(
+      useShallow((state) => ({
+        setContacts: state.setContacts,
+        setTempContacts: state.setTempContacts,
+        setPermissionGranted: state.setPermissionGranted,
+      }))
+    );
 
-  const signout = useMainStore((state) => state.signOut)
+  const signout = () => {
+    setChats([]);
+    setContacts([]);
+    setTempContacts([]);
+    setPermissionGranted(false);
+    signOut();
+  };
 
   return (
     <Tab.Navigator
       initialRouteName="Chats"
+      sceneContainerStyle={{
+        backgroundColor:'#fff000'
+      }}
       screenOptions={{
         tabBarShowLabel: false,
-        headerTitleStyle: {
-          fontSize: 24,
-        },
         tabBarStyle: {
           elevation: 10,
         },
         headerStyle: {
           elevation: 0,
-          borderBottomWidth: 2,
-          borderColor: "#f6f6f6",
+          borderBottomWidth: 1,
+          borderColor: colorScheme==='dark'? '#313131' : "#f6f6f6",
+          backgroundColor: colorScheme === "dark" ? "#121212" : "#fff",
+        },
+        headerTitleStyle: {
+          color: colorScheme === "light" ? "#121212" : "#fff",
+          fontSize: 24,
+          fontWeight:700
         },
       }}
       backBehavior="none"
       tabBar={(props) => <MyTabBar {...props} />}
     >
-      <Tab.Screen
-        name="Calls"
-        component={Calls}
-        options={{
-          tabBarIcon: ({ focused, color, size }) =>
-            focused ? (
-              <GradientText colors={["#5ce27f", "#5cabe2"]} style={{}}>
-                <Ionicons name="call-outline" size={24} color="black" />
-              </GradientText>
-            ) : (
-              <Ionicons name="call-outline" size={24} color="#b1b1b1" />
-            ),
-        }}
-      />
+      <Tab.Screen name="Calls" component={Calls} options={{}} />
       <Tab.Screen
         name="Chats"
         component={Chats}
-        options={({ route }) => ({
-          headerTitleStyle: {
-            fontWeight: "700",
-          },
-          tabBarIcon: ({ focused, color, size }) =>
-            focused ? (
-              <GradientText colors={["#5ce27f", "#5cabe2"]} style={{}}>
-                <Ionicons name="chatbubble-outline" size={24} color="black" />
-              </GradientText>
-            ) : (
-              <Ionicons name="chatbubble-outline" size={24} color="#b1b1b1" />
-            ),
+        options={(props) => ({
           headerRight: () => (
-            <GradientText
-              colors={["#5ce27f", "#5cabe2"]}
-              style={{
-                paddingHorizontal: 16,
-              }}
-            >
-              <FontAwesome5 name="user-plus" size={20} color="#5cabe2" />
-            </GradientText>
+            <ChatScreenHeaderRight navigation={props.navigation} />
           ),
         })}
       />
@@ -80,19 +77,13 @@ const MainScreenTabs = () => {
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ focused, color, size }) =>
-            focused ? (
-              <GradientText colors={["#5ce27f", "#5cabe2"]} style={{}}>
-                <Ionicons name="settings-outline" size={24} color="black" />
-              </GradientText>
-            ) : (
-              <View>
-                <Ionicons name="settings-outline" size={24} color="#b1b1b1" />
-              </View>
-            ),
           headerRight: () => (
             <TouchableOpacity className="px-4" onPress={signout}>
-              <MaterialIcons name="logout" size={24} color={'#000000'} />
+              <MaterialIcons
+                name="logout"
+                size={24}
+                color={colorScheme === "light" ? "#121212" : "#fff"}
+              />
             </TouchableOpacity>
           ),
         }}
@@ -111,7 +102,7 @@ function MyTabBar({ state, descriptors, navigation }) {
   };
 
   return (
-    <View className="flex-row bg-white justify-center border-t-2 border-[#f6f6f6]">
+    <View className="flex-row bg-white dark:bg-[#121212] justify-center border-t border-[#f6f6f6] dark:border-[#313131]">
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =

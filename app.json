@@ -31,6 +31,14 @@
       "eas": {
         "projectId": "16fbbdb6-dc8e-4e3f-bc01-63df1e12b2fc"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
+        }
+      ]
+    ]
   }
 }

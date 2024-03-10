@@ -1,47 +1,51 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TextInput, Button } from "react-native";
-import socket from "../Sockets/Socket";
-import { storage } from "../DL/MMKV_Storage";
+import { View, Text, Button, Switch, Appearance } from "react-native";
+import { useContactStore } from "../stores/contactStore";
+import { useChatStore } from "../stores/chatsStore";
+import { useColorScheme } from "nativewind";
+import { useMainStore } from "../stores/mainStore";
+import { useThemeStore } from "../stores/themeStore";
 
 const SettingsScreen = () => {
-  const [number, setNumber] = useState("");
-  const [borderColor, setBorderColor] = useState("#f0f0f0");
+  const setContacts = useContactStore((state) => state.setContacts);
+  const clearChats = useChatStore((state) => state.clearChats);
 
-  const handleNumberInputChange = (text) => {
-    setNumber(text);
-    if (text.length > 0) {
-      setBorderColor("#f0f0f0");
-    }
-  };
+  const { setColorScheme } = useColorScheme();
 
-  const joinRoomHandler = () => {
-    socket.disconnect();
-    if (number == "") {
-      setBorderColor("red");
-    } else {
-      setBorderColor("#f0f0f0");
-      socket.connect();
-      socket.emit("join", { number });
-      storage.set("user.number", number);
-    }
-  };
+  const setTheme = useThemeStore((state) => state.setTheme);
+  const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {}, []);
 
   return (
-    <View className="flex-1 justify-center p-5 bg-white">
-      <TextInput
-        keyboardType="number-pad"
-        placeholder="Enter number"
-        value={number}
-        onChangeText={handleNumberInputChange}
-        maxLength={10}
-        className={`w-full border-2 p-3 rounded-2xl mb-4`}
-        style={{
-          borderColor: borderColor,
-        }}
-      />
-      <Button title="Join room" />
+    <View
+      className="flex-1 justify-center items-center p-5 bg-white dark:bg-[#121212]"
+      style={{ gap: 10 }}
+    >
+      <View className="flex-row" style={{ gap: 10 }}>
+        <View className="flex-1">
+          <Button onPress={() => setContacts([])} title="Clear contacts" />
+        </View>
+        <View className="flex-1">
+          <Button onPress={clearChats} title="Clear chats" />
+        </View>
+      </View>
+      <View className="flex-row items-center" style={{ gap: 10 }}>
+        <Text className="dark:text-white">Light mode</Text>
+        <Switch
+          onValueChange={(val) => {
+            if (val) {
+              setTheme("dark");
+              setColorScheme("dark");
+            } else {
+              setTheme("light");
+              setColorScheme("light");
+            }
+          }}
+          value={theme === 'dark' ? true : false}
+        />
+        <Text className="dark:text-white">Dark mode</Text>
+      </View>
     </View>
   );
 };

@@ -25,14 +25,14 @@ const AuthScreen = ({ navigation }) => {
     Keyboard.dismiss();
     setFetching(true);
     axios
-      .post(`${API_URL}/login`, { number, password })
+      .post(`${API_URL}/login`, { number: "+91" + number, password })
       .then((data) => {
         setFetching(false);
         setError(null);
         if (data) {
           const { token, user } = data.data;
-          const { number, name, _id } = user;
-          signInLocal({ token, number, name, _id });
+          const { number, userName, _id } = user;
+          signInLocal({ token, name: userName, number, _id });
         }
       })
       .catch((error) => {
@@ -40,7 +40,7 @@ const AuthScreen = ({ navigation }) => {
         if (error.response?.status) {
           setError(error.response.data);
         } else {
-          ToastAndroid.show("Unable to connect to server",ToastAndroid.SHORT)
+          ToastAndroid.show("Unable to connect to server", ToastAndroid.SHORT);
         }
       });
   };

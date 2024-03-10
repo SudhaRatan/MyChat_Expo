@@ -25,7 +25,7 @@ const Signup = ({ navigation }) => {
     axios({
       method: "POST",
       url: `${API_URL}/login/signup`,
-      data: { userName, number, password },
+      data: { userName, number: "+91" + number, password },
     })
       .then((data) => {
         navigation.goBack();

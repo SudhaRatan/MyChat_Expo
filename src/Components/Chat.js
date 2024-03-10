@@ -16,7 +16,7 @@ const Chat = ({
   return (
     <Pressable
       android_ripple={{ borderless: false }}
-      className="justify-between items-center border-b-2 border-[#f6f6f6] flex-row"
+      className="justify-between items-center border-b border-t border-[#f6f6f6] dark:border-[#313131] flex-row"
       onPress={() => onclick({ name, dp, number })}
     >
     {
@@ -40,7 +40,7 @@ const Chat = ({
       
       <View className="flex-1 flex-col pr-2">
         <View className="flex-row m-1.5 justify-between">
-          <Text className="font-bold text-lg">{name}</Text>
+          <Text className="font-bold text-lg dark:text-[#fff]">{name}</Text>
           {unreadMessages > 0 ? (
             <GradientText colors={["#5ce27f", "#5cabe2"]}>
               <Text className="text-[#c1c1c1]">{lastMessageDateTime}</Text>
