@@ -9,7 +9,7 @@ export default function App() {
   const { colorScheme } = useColorScheme();
 
   return (
-      <NavigationContainer>
+      <NavigationContainer theme={{colors:{background: colorScheme === 'dark' ? '#121212' : '#ffffff'}}}>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         <MainRoute />
       </NavigationContainer>

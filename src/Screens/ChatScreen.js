@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -12,17 +12,23 @@ import { Feather } from "@expo/vector-icons";
 import GradientText from "../Components/LinearGradientText";
 import socket from "../Sockets/Socket";
 import { StackActions } from "@react-navigation/native";
-import { useMessageStore } from "../stores/messageStore";
 import { useMainStore } from "../stores/mainStore";
 import { LinearGradient } from "expo-linear-gradient";
+import { useMessageStore } from "../stores/messageStore";
+import { Entypo } from "@expo/vector-icons";
 
 const ChatScreen = ({ route, navigation }) => {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const { number } = route.params;
   const [newMessage, setNewMessage] = useState("");
   const myNumber = useMainStore((state) => state.number);
+  const setCurrentScreen = useMessageStore((state) => state.setCurrentScreen);
 
   const [chats, setChats] = useState([]);
+  const [viewHeight, setViewHeight] = useState(0);
+
+  const [scrollIndicator, setScrollIndicator] = useState(false);
+  const [newMsg, setNewMsg] = useState(false);
 
   const sendMessage = () => {
     const msg = {
@@ -36,6 +42,7 @@ const ChatScreen = ({ route, navigation }) => {
       ...prev,
       { ...msg, type: "sent", id: Math.random() * 10 },
     ]);
+    FlatListRef.current.scrollToEnd({ animated: true });
   };
 
   useEffect(() => {
@@ -45,27 +52,73 @@ const ChatScreen = ({ route, navigation }) => {
         ...prev,
         { ...data, type: "received", id: Math.random() * 10 },
       ]);
+      setNewMsg(true);
     });
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       function () {
+        setCurrentScreen("");
         StackActions.pop();
         navigation.navigate("Main");
         return true;
       }
     );
+
+    bottomRef.current.measure((x, y, width, height, pageX, pageY) => {
+      setViewHeight(height);
+    });
+
     return () => {
+      socket.off("new_message");
       backHandler.remove();
     };
   }, []);
 
+  const FlatListRef = useRef(null);
+  const bottomRef = useRef(null);
+  const [shouldScrollToEnd, setShouldScrollToEnd] = useState(true);
+
+  const handleScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const viewHeight = event.nativeEvent.layoutMeasurement.height;
+    // console.log(offsetY, contentHeight, viewHeight);
+
+    // Calculate the scroll position
+    const isNearEnd =
+      Math.floor(contentHeight - offsetY) === Math.floor(viewHeight);
+
+    // If the user is near the end, enable scrolling to the end
+    if (isNearEnd) {
+      setShouldScrollToEnd(true);
+      setScrollIndicator(false);
+    } else {
+      setShouldScrollToEnd(false);
+      setScrollIndicator(true);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white dark:bg-[#121212] justify-between">
       <FlatList
+        className="flex-1"
+        ref={FlatListRef}
+        onScroll={handleScroll}
         data={chats}
         keyExtractor={(item) => item.id}
         extraData={chats}
+        onContentSizeChange={() => {
+          if (chats[chats.length - 1]?.type === "received") {
+            if (shouldScrollToEnd) {
+              FlatListRef.current.scrollToEnd({ animated: true });
+              setNewMsg(false);
+            }
+          } else {
+            FlatListRef.current.scrollToEnd({ animated: true });
+            setNewMsg(false);
+          }
+        }}
         renderItem={({ item }) => {
           return (
             <View
@@ -77,9 +130,8 @@ const ChatScreen = ({ route, navigation }) => {
               {item.type === "received" ? (
                 <View style={{ maxWidth: "80%" }}>
                   <Text
-                    className="px-3 py-2 mx-2 my-1 rounded-3xl rounded-br-none"
+                    className="px-3 py-2 mx-2 my-1 rounded-2xl rounded-bl-none dark:text-[#EFEFEF] bg-[#EFEFEF] dark:bg-[#313131]"
                     style={{
-                      backgroundColor: colorScheme === 'dark'? '#313131' : "#efefef",
                       fontSize: 16,
                     }}
                   >
@@ -89,7 +141,7 @@ const ChatScreen = ({ route, navigation }) => {
               ) : (
                 <View style={{ maxWidth: "80%" }}>
                   <LinearGradient
-                    className="px-3 py-2 mx-2 my-1 rounded-3xl rounded-br-[2]"
+                    className="px-3 py-2 mx-2 my-1 rounded-2xl rounded-br-[2]"
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     colors={["#5ce27f", "#5cabe2"]}
@@ -109,12 +161,45 @@ const ChatScreen = ({ route, navigation }) => {
           );
         }}
       />
-      <View className="p-3 flex-row items-end bg-white dark:bg-[#121212]" style={{ gap: 10 }}>
+      {scrollIndicator && (
+        <TouchableOpacity
+          className={`rounded-full bg-white dark:bg-[#313131] absolute right-0 p-1 m-4 `}
+          onPress={() => {
+            setNewMsg(false);
+            FlatListRef.current.scrollToEnd({ animated: true });
+          }}
+          style={{ elevation: 2, bottom: viewHeight, gap: 10 }}
+        >
+          {newMsg && (
+            <View className="justify-center items-center">
+              <Text className="dark:text-white">1</Text>
+            </View>
+          )}
+          <Entypo
+            name="chevron-down"
+            size={20}
+            color={colorScheme === "light" ? "black" : "#efefef"}
+          />
+        </TouchableOpacity>
+      )}
+
+      <View
+        ref={bottomRef}
+        className="p-3 flex-row items-end bg-white dark:bg-[#121212]"
+        style={{ gap: 10 }}
+      >
         <TouchableOpacity
           android_ripple={{ borderless: true }}
           className="border-2 rounded-full border-[#f0f0f0] dark:border-[#313131]"
         >
-          <GradientText colors={colorScheme === 'light' ? ["#5ce27f", "#5cabe2"] : ["#ffffff","#ffffff"]} style={{ padding: 10 }}>
+          <GradientText
+            colors={
+              colorScheme === "light"
+                ? ["#5ce27f", "#5cabe2"]
+                : ["#ffffff", "#ffffff"]
+            }
+            style={{ padding: 10 }}
+          >
             <Feather name="camera" size={24} />
           </GradientText>
         </TouchableOpacity>
@@ -123,7 +208,7 @@ const ChatScreen = ({ route, navigation }) => {
           multiline={true}
           style={{ fontSize: 16, maxHeight: 120 }}
           placeholder="Message..."
-          placeholderTextColor={colorScheme === 'dark' && '#ffffff80'}
+          placeholderTextColor={colorScheme === "dark" && "#ffffff80"}
           value={newMessage}
           onChangeText={(value) => setNewMessage(value)}
         />
@@ -132,7 +217,14 @@ const ChatScreen = ({ route, navigation }) => {
           onPress={sendMessage}
           className="border-2 rounded-full border-[#f0f0f0] dark:border-[#313131]"
         >
-          <GradientText colors={colorScheme === 'light' ? ["#5ce27f", "#5cabe2"] : ["#ffffff","#ffffff"]} style={{ padding: 10 }}>
+          <GradientText
+            colors={
+              colorScheme === "light"
+                ? ["#5ce27f", "#5cabe2"]
+                : ["#ffffff", "#ffffff"]
+            }
+            style={{ padding: 10 }}
+          >
             <Feather name="send" size={24} />
           </GradientText>
         </TouchableOpacity>

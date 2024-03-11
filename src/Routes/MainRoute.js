@@ -1,4 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainScreenTabs from "./MainScreenTab";
 import ChatScreen from "../Screens/ChatScreen";
 import { useColorScheme } from "nativewind";
@@ -13,7 +14,8 @@ import ContactScreenHeader from "../Components/ContactScreenHeader";
 import { useThemeStore } from "../stores/themeStore";
 import { View } from "react-native";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
+// const Stack = createStackNavigator();
 
 const MainRoute = () => {
   const isSignedIn = useMainStore((state) => state.isSignedIn);
@@ -36,64 +38,67 @@ const MainRoute = () => {
     socket.on("disconnect", function () {
       console.log("Disconnected to server");
     });
+
+    
   }, []);
 
   return (
-      <Stack.Navigator>
-        {isSignedIn ? (
-          <>
-            <Stack.Screen
-              name="Main"
-              component={MainScreenTabs}
-              options={{
-                headerShown: false,
-              }}
-              
-            />
-            <Stack.Screen
-              name="ChatScreen"
-              options={(props) => ({
-                header: () => (
-                  <ChatScreenHeader navigation={props.navigation} />
-                ),
-              })}
-              component={ChatScreen}
-            />
-            <Stack.Screen
-              name="AddContacts"
-              options={(props) => ({
-                headerTitle: "Add Contacts",
-                headerStyle: {
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#f0f0f0",
-                },
-                header: () => (
-                  <ContactScreenHeader navigation={props.navigation} />
-                ),
-              })}
-              component={AddContactsScreen}
-            />
-          </>
-        ) : (
-          <>
-            <Stack.Screen
-              options={{
-                headerShown: false,
-              }}
-              name="AuthScreen"
-              component={AuthScreen}
-            />
-            <Stack.Screen
-              options={{
-                headerShown: false,
-                presentation: "modal",
-              }}
-              name="Signup"
-              component={Signup}
-            />
-          </>
-        )}
-      </Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        animation: "ios",
+      }}
+    >
+      {isSignedIn ? (
+        <>
+          <Stack.Screen
+            name="Main"
+            component={MainScreenTabs}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ChatScreen"
+            options={(props) => ({
+              header: () => <ChatScreenHeader navigation={props.navigation} />,
+            })}
+            component={ChatScreen}
+          />
+          <Stack.Screen
+            name="AddContacts"
+            options={(props) => ({
+              headerTitle: "Add Contacts",
+              headerStyle: {
+                borderBottomWidth: 1,
+                borderBottomColor: "#f0f0f0",
+              },
+              header: () => (
+                <ContactScreenHeader navigation={props.navigation} />
+              ),
+            })}
+            component={AddContactsScreen}
+          />
+        </>
+      ) : (
+        <>
+          <Stack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="AuthScreen"
+            component={AuthScreen}
+          />
+          <Stack.Screen
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+            name="Signup"
+            component={Signup}
+          />
+        </>
+      )}
+    </Stack.Navigator>
   );
 };
 

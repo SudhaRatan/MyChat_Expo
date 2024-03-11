@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import * as Contacts from "expo-contacts";
 import { useMainStore } from "../stores/mainStore";
 import { useChatStore } from "../stores/chatsStore";
+import { useMessageStore } from "../stores/messageStore";
 
 const AddContactsScreen = ({ navigation }) => {
   const permissionGranted = useContactStore((state) => state.permissionGranted);
@@ -20,6 +21,8 @@ const AddContactsScreen = ({ navigation }) => {
   const [myContact, setMyContact] = useState(null);
   const myNumber = useMainStore((state) => state.number);
   const name = useMainStore((state) => state.name);
+
+  const setCurrentScreen = useMessageStore((state) => state.setCurrentScreen)
 
   useEffect(() => {
     const groupContacts = async (c) => {
@@ -99,13 +102,14 @@ const AddContactsScreen = ({ navigation }) => {
   }, []);
 
   const goToChat = ({ id, name, dp, number }) => {
+    setCurrentScreen("ChatScreen")
     changeheaderName(name, dp);
     insertChat({ id, name, number, dp });
     navigation.navigate("ChatScreen", { number });
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-[#121212]">
       {permissionGranted && contacts.length > 0 ? (
         <>
           {myContact && (
@@ -113,12 +117,14 @@ const AddContactsScreen = ({ navigation }) => {
               // onPress={() =>
               //   ToastAndroid.show("Your contact", ToastAndroid.SHORT)
               // }
-              onPress={goToChat}
+              onPress={() => {
+                ToastAndroid.show("Your contact", ToastAndroid.SHORT);
+              }}
               {...myContact}
               name={name}
             />
           )}
-          <Text className="font-semibold text-lg p-2 text-[#80808080]">
+          <Text className="font-semibold text-lg p-2 text-[#80808080] dark:text-white">
             My Chat Users
           </Text>
           <FlatList

@@ -12,7 +12,7 @@ import GradientText from "./LinearGradientText";
 const Contact = ({ pnId, name, image, number, ne, onPress }) => {
   return (
     <Pressable
-      className="flex-row border-b border-t border-[#f0f0f0] w-full justify-between items-center p-3"
+      className="flex-row border-b border-t border-[#f0f0f0] dark:border-[#313131] w-full justify-between items-center p-3"
       style={{ gap: 12 }}
       android_ripple={{ borderless: false }}
       onPress={() => {
@@ -44,10 +44,10 @@ const Contact = ({ pnId, name, image, number, ne, onPress }) => {
           />
         )}
         <View>
-          <Text className="flex" style={{ fontSize: 17, fontWeight: 500 }}>
+          <Text className="flex dark:text-[#fcfcfc]" style={{ fontSize: 17, fontWeight: 500 }}>
             {name}
           </Text>
-          <Text>{number}</Text>
+          <Text className="text-[#c1c1c1]">{number}</Text>
         </View>
       </View>
       {ne && (
